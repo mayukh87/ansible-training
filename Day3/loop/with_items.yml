@@ -1,0 +1,17 @@
+---
+- name: Looping using with items
+  hosts: linux
+  become: yes
+
+  tasks:
+    - name: Install multiple packages
+      ansible.builtin.apt:
+        name: "{{ item }}"
+        state: present
+          #update_cache: yes
+      with_items:
+        - git
+        - curl
+        - vim
+        - nginx
+

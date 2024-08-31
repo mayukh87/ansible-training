@@ -1,0 +1,27 @@
+---
+- name: Testing out conditional statement
+  hosts: 4.240.87.155
+  become: yes
+
+  vars:
+    install_htop: true
+    install_on_low_memory: false
+    memory_threshold_met: true
+
+  tasks:
+    - name: Install `htop` if install_htop is true OR memory_threshold_met is true
+      apt:
+        name: htop
+        state: present
+      when: install_htop or memory_threshold_met
+
+    - name: Install `htop` if install_htop is true AND install_on_low_memory is true
+      apt:
+        name: htop
+        state: present
+      when: install_htop and install_on_low_memory
+
+    - name: Print a message if conditions are not met
+      debug:
+        msg: "htop installation is skipped due to conditions not being met."
+      when: not (install_htop or memory_threshold_met)

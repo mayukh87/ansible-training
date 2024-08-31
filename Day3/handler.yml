@@ -1,0 +1,24 @@
+---
+- name: Simple Handler Example
+  become: true
+  hosts: linux
+  tasks:
+    - name: Create engineers group
+      group:
+        name: engineers
+        state: present
+      notify: handler called
+
+    - name: Another task in the play
+      debug:
+        msg: "I am just another task."
+      notify: Another handler called
+
+  handlers:
+    - name: handler called
+      debug:
+        msg: "This is from handler"
+
+    - name: Another handler called
+      debug:
+        msg: "This is from Another handler"

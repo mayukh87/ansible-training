@@ -1,0 +1,29 @@
+---
+- name: Create a file
+  become: yes
+  become_method: sudo
+  become_user: root
+  hosts: linux
+  tasks:
+    - name: create a new file
+      file:
+        path: /tmp/from_controller1.conf
+        mode: 0664
+        state: touch
+
+          #- name: create an archive
+          #  become: yes
+          #  archive:
+          #    path: /var/log
+          #    dest: /tmp/logs.tar.gz
+          #    format: gz
+
+
+- name: second play
+  hosts: win
+  tasks:
+    - name: Create a file
+      ansible.windows.win_file:
+        path: C:\Windows\Temp\test.txt
+        state: touch
+

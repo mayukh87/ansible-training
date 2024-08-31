@@ -1,0 +1,28 @@
+---
+- name: Looping using with items
+  hosts: linux
+  become: yes
+  vars:
+    packages:
+      - name: nginx
+        dir: /var/www/nginx
+      - name: redis-server
+        dir: /var/lib/redis
+
+  tasks:
+    - name: Install required packages
+      ansible.builtin.apt:
+        name: "{{ item.name }}"
+        state: present
+        update_cache: yes
+      with_items: "{{ packages }}"
+    
+    - name: Create directories for each service
+      ansible.builtin.file:
+        path: "{{ item.dir }}"
+        state: directory
+        owner: root
+        group: root
+        mode: 0755
+      with_items: "{{ packages }}"
+

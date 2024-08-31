@@ -1,0 +1,43 @@
+---
+- name: Manage users and deploy configurations securely
+  hosts: linux
+  become: yes
+  vars_files:
+    - vars/vault.yml
+
+  tasks:
+    - name: Ensure user 'deploy_user' exists
+      user:
+        name: deploy_user
+        password: "{{ user_password | password_hash('sha512') }}"
+        shell: /bin/bash
+        state: present
+
+    - name: Create application configuration directory
+      file:
+        path: /etc/myapp
+        state: directory
+        owner: deploy_user
+        group: deploy_user
+        mode: '0755'
+
+    - name: Deploy application configuration file with vaulted credentials
+      template:
+        src: templates/app_config.j2
+        dest: /etc/myapp/config.ini
+        owner: deploy_user
+        group: deploy_user
+        mode: '0640'
+
+    - name: Restart application service
+      service:
+        name: myapp
+        state: restarted
+      notify: Reload application
+
+  handlers:
+    - name: Reload application
+      service:
+        name: myapp
+        state: reloaded
+

@@ -1,0 +1,33 @@
+---
+- name: Ensure /var/www/html is writable
+  hosts: linux
+  become: yes
+
+  tasks:
+    - name: Change ownership of /var/www/html to the web server user
+      file:
+        path: /var/www/html
+        owner: www-data
+        group: www-data
+        recurse: yes
+      when: ansible_facts['distribution'] == "Ubuntu"
+
+    - name: create dir
+      file:
+        path: /var/www/html
+        state: directory
+      when: ansible_facts['distribution'] in ["CentOS", "RedHat"]
+
+    - name: Change ownership of /var/www/html to the web server user (CentOS/RedHat)
+      file:
+        path: /var/www/html
+        owner: azureuser
+        group: azureuser
+        recurse: yes
+      when: ansible_facts['distribution'] in ["CentOS", "RedHat"]
+
+    - name: Ensure /var/www/html has correct permissions
+      file:
+        path: /var/www/html
+        mode: '0755'
+

@@ -1,0 +1,6 @@
+- name: Test PSRP Connection to Windows Host
+  hosts: win
+  tasks:
+    - name: Ensure connection works
+      win_ping:
+

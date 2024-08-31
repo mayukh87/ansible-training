@@ -1,0 +1,64 @@
+---
+- name: Ensure Nginx is installed and configure it using Jinja2 Template
+  hosts: localhost
+  become: yes
+
+  vars:
+    server_name: example.com
+    backend_server: 127.0.0.1:8080
+    enable_ssl: true
+    ssl_certificate_path: /etc/ssl/certs/example.com.crt
+    ssl_certificate_key_path: /etc/ssl/private/example.com.key
+
+  tasks:
+    - name: Install Nginx if not already installed (Ubuntu)
+      apt:
+        name: nginx
+        state: present
+      when: ansible_facts['distribution'] == "Ubuntu"
+
+    - name: Install Nginx if not already installed (CentOS/RHEL)
+      yum:
+        name: nginx
+        state: present
+      when: ansible_facts['distribution'] in ["CentOS", "RedHat"]
+
+    - name: Ensure the /etc/nginx/sites-available directory exists
+      file:
+        path: /etc/nginx/sites-available
+        state: directory
+        owner: root
+        group: root
+        mode: '0755'
+
+    - name: Create Nginx config from template
+      template:
+        src: templates/nginx.conf.j2
+        dest: /etc/nginx/sites-available/example.com
+        owner: root
+        group: root
+        mode: '0644'
+      when: enable_ssl | bool and ssl_certificate_path is file and ssl_certificate_key_path is file
+
+    - name: Disable SSL in the Nginx config if certificates are missing
+      template:
+        src: templates/nginx.conf.j2
+        dest: /etc/nginx/sites-available/example.com
+        owner: root
+        group: root
+        mode: '0644'
+      when: not enable_ssl | bool or not (ssl_certificate_path is file and ssl_certificate_key_path is file)
+      vars:
+        enable_ssl: false
+
+    - name: Ensure the Nginx config is linked to sites-enabled
+      file:
+        src: /etc/nginx/sites-available/example.com
+        dest: /etc/nginx/sites-enabled/example.com
+        state: link
+        force: yes
+
+    - name: Restart Nginx
+      service:
+        name: nginx
+        state: restarted

@@ -1,0 +1,28 @@
+---
+- name: show some facts
+  hosts: linux
+  gather_facts: false
+  tasks:
+    - name: test msg
+      debug:
+        msg: "Hello"
+
+    - name: display node1 ipv4 address
+      debug:
+        msg: IPv4 address is {{ ansible_facts.default_ipv4.address }}
+      ignore_errors: true
+
+    - name: test msg
+      debug:
+        msg: "Below IPV4 task"
+    
+    - name: display node1 fqdn
+      debug:
+        msg: FQDN is {{ ansible_facts.fqdn }}
+    
+    - name: display node1 OS distribution
+      debug:
+        msg: 
+          - OS Distro is {{ ansible_facts.distribution }}
+          - Distro is {{ ansible_distribution }}
+          - Distro Version is {{ ansible_facts.architecture }}

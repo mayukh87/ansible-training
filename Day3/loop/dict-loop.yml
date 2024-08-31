@@ -1,0 +1,15 @@
+---
+- name: Print Dictionary
+  hosts: linux
+  vars:
+    employee:
+      name: "Elliot Alderson"
+      title: "Penetration Tester"
+      company: "Linux Handbook"
+  tasks:
+    - name: Print employee dictionary
+      debug:
+        msg: "{{ item }}"
+      loop: "{{ employee | dict2items }}"
+      #dict2items
+      #loop:  "{{ groups['linux'] }}"

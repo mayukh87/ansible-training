@@ -1,0 +1,10 @@
+---
+- name: Create a file
+  become: yes
+  hosts: linux
+  tasks:
+    - name: create an archive
+      archive:
+        path: /var/log
+        dest: /run/logs.tar.gz
+        format: gz

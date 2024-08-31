@@ -1,0 +1,14 @@
+---
+- name: Pausing in loop
+  hosts: localhost
+  tasks:
+  - name: Ten seconds countdown
+    debug:
+      msg: "{{ 10 - item }} seconds remaining ..."
+    loop: "{{ range(10) | list }}"
+    loop_control:
+      pause: 3
+
+  - name: Display message
+    debug:
+      msg: "Paused loop success!"

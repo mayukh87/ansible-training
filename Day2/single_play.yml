@@ -1,0 +1,9 @@
+---
+- name: Create a file
+  hosts: linux
+  tasks:
+    - name: create a new file
+      file:
+        path: /tmp/from_controller.conf
+        mode: 0664
+        state: touch

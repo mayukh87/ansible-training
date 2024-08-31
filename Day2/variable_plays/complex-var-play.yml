@@ -1,0 +1,13 @@
+---
+- name: Working with variables
+  hosts: localhost
+  vars_files: var_file.yml
+
+  tasks:
+    - name: Show 2nd item in port_nums
+      debug:
+        msg: SSH port is {{ port_nums[1] }}
+
+    - name: Show the uid of bob
+      debug:
+        msg: UID of bob is {{ users.bob.uid }}
