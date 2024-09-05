@@ -1,9 +1,23 @@
 ---
 - name: Create a file
-  hosts: linux
+  hosts: localhost
+  vars:
+    vm:
+      - vmshaprdclss1_123ee
+      - vmshanrdclss1_123ee
+      - vmshadrdclss1_123ee
+      - vmshaurdclss1_123ee
   tasks:
     - name: create a new file
-      file:
-        path: /tmp/from_controller.conf
-        mode: 0664
-        state: touch
+      debug:
+        msg: 
+          - "This is from prod"
+      when: "{{ item.split('_')[0][5] == 'p' }}"
+      with_items: "{{ vm }}"
+
+    - name: create a new file
+      debug:
+        msg:
+          - "This is from NON PROD env's"
+      when: item.split('_')[0][5] in ['n', 'd', 'u']
+      with_items: "{{ vm }}"
