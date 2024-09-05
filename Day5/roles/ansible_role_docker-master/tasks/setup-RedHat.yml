@@ -1,0 +1,76 @@
+---
+# - name: Ensure old versions of Docker are not installed.
+  # package:
+    # name:
+      # - docker
+      # - docker-common
+      # - docker-engine
+    # state: absent
+
+# - name: Add Docker GPG key.
+  # rpm_key:
+    # key: https://download.docker.com/linux/centos/gpg
+    # state: present
+
+# - name: Add Docker repository.
+  # get_url:
+    # url: "{{ docker_yum_repo_url }}"
+    # dest: '/etc/yum.repos.d/docker-{{ docker_edition }}.repo'
+    # owner: root
+    # group: root
+    # mode: 0644
+
+# - name: Configure Docker Edge repo.
+  # ini_file:
+    # dest: '/etc/yum.repos.d/docker-{{ docker_edition }}.repo'
+    # section: 'docker-{{ docker_edition }}-edge'
+    # option: enabled
+    # value: '{{ docker_yum_repo_enable_edge }}'
+
+# - name: Configure Docker Test repo.
+  # ini_file:
+    # dest: '/etc/yum.repos.d/docker-{{ docker_edition }}.repo'
+    # section: 'docker-{{ docker_edition }}-test'
+    # option: enabled
+    # value: '{{ docker_yum_repo_enable_test }}'
+
+# - name: Install containerd separately (CentOS 8).
+  # package:
+    # name: https://download.docker.com/linux/centos/7/x86_64/stable/Packages/containerd.io-1.2.6-3.3.el7.x86_64.rpm
+    # state: present
+  # when: ansible_distribution_major_version | int == 8
+  
+- name: Download dependencies first.
+  copy:
+    src: "{{ item }}"
+    dest: "/tmp/docker/dependency/"
+  with_fileglob: "{{ docker_rpm_file_path }}/docker_dependency/*.rpm"
+
+- name: Install all the dependencies.
+  command: "rpm -ivh --force {{ item }}"
+  with_items:
+    - "/tmp/docker/dependency/setools-libs-3.3.8-4.el7.x86_64.rpm"
+    - "/tmp/docker/dependency/python-IPy-0.75-6.el7.noarch.rpm"
+    - "/tmp/docker/dependency/audit-libs-python-2.8.5-4.el7.x86_64.rpm"
+    - "/tmp/docker/dependency/checkpolicy-2.5-8.el7.x86_64.rpm"
+    - "/tmp/docker/dependency/libcgroup-0.41-21.el7.x86_64.rpm"
+    - "/tmp/docker/dependency/libsemanage-python-2.5-14.el7.x86_64.rpm"
+    - "/tmp/docker/dependency/policycoreutils-python-2.5-33.el7.x86_64.rpm"
+
+  ignore_errors: true
+
+- name: Download docker dependencies.
+  copy:
+    src: "{{ item }}"
+    dest: "/tmp/docker/"
+  with_fileglob: "{{ docker_rpm_file_path }}/*.rpm"
+
+- name: Install all the docker dependencies and docker.
+  command: "rpm -ivh --force {{ item }}"
+  with_items:
+      - "/tmp/docker/libtool-ltdl-2.4.2-22.el7_3.x86_64.rpm"
+      - "/tmp/docker/docker-ce-selinux-17.03.3.ce-1.el7.noarch.rpm"
+      - "/tmp/docker/docker-ce-17.03.3.ce-1.el7.x86_64.rpm"
+  ignore_errors: true
+  register: docker_install_packages
+  notify: restart docker
